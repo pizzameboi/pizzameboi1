@@ -8,9 +8,9 @@ local hrp = character:WaitForChild("HumanoidRootPart")
 local breakables = workspace.GameObjects.Breakables
 local autoHitEnabled = false
 local autoBuyEnabled = false
-local lastTeleportedBreakable = nil -- Tracks the last breakable you teleported to
+local lastBreakableName = nil -- Track the current breakable's name
 
--- Function to find the nearest breakable to the player
+-- Function to find the nearest breakable
 local function getNearestBreakable()
     local nearest = nil
     local minDistance = math.huge
@@ -26,35 +26,39 @@ local function getNearestBreakable()
     return nearest
 end
 
--- Teleport function to the nearest breakable (only once per new breakable)
-local function teleportToBreakable(breakable)
-    if breakable and breakable ~= lastTeleportedBreakable and breakable:IsA("BasePart") then
+-- Function to teleport to the breakable, hit it, and wait until it disappears
+local function teleportAndHit(breakable)
+    if breakable and breakable:IsA("BasePart") then
         character:SetPrimaryPartCFrame(breakable.CFrame)
-        lastTeleportedBreakable = breakable -- Set the current breakable as the last teleported one
+        lastBreakableName = breakable.Name -- Store the current breakable's name
+
+        -- Auto-hit the breakable repeatedly until it disappears
+        repeat
+            -- Hit the breakable
+            local args = { [1] = breakable.Name }
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Packages")
+                :WaitForChild("Knit")
+                :WaitForChild("Services")
+                :WaitForChild("BreakableService")
+                :WaitForChild("RF")
+                :WaitForChild("HitBreakable")
+                :InvokeServer(unpack(args))
+
+            wait(0.05) -- Hit every 0.05 seconds
+        until not breakables:FindFirstChild(lastBreakableName)
     end
 end
 
--- Function to auto-hit the nearest breakable
+-- Function to auto-hit the nearest breakable continuously
 local function autoHit()
     spawn(function()
         while autoHitEnabled do
             local nearestBreakable = getNearestBreakable()
             if nearestBreakable then
-                -- Teleport only once per new breakable
-                teleportToBreakable(nearestBreakable)
-
-                -- Auto-hit the nearest breakable
-                local args = { [1] = nearestBreakable.Name }
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("Packages")
-                    :WaitForChild("Knit")
-                    :WaitForChild("Services")
-                    :WaitForChild("BreakableService")
-                    :WaitForChild("RF")
-                    :WaitForChild("HitBreakable")
-                    :InvokeServer(unpack(args))
+                teleportAndHit(nearestBreakable) -- Teleport and hit the breakable
             end
-            wait(0.05) -- Hit every 0.05 seconds
+            wait(0.1) -- Small delay between each search for a new breakable
         end
     end)
 end
@@ -65,10 +69,10 @@ local function autoBuy()
         while autoBuyEnabled do
             local args = {
                 [1] = "Zombie Merchant", -- Merchant name
-                [2] = 5 -- Quantity of item
+                [2] = 5 -- Quantity
             }
 
-            -- Invoke the buy function on the server
+            -- Invoke the buy function
             game:GetService("ReplicatedStorage")
                 :WaitForChild("Packages")
                 :WaitForChild("Knit")
@@ -78,7 +82,7 @@ local function autoBuy()
                 :WaitForChild("BuyItem")
                 :InvokeServer(unpack(args))
 
-            wait(1) -- Adjust the delay between auto-buy attempts as needed
+            wait(1) -- Adjust delay as needed
         end
     end)
 end
@@ -90,37 +94,37 @@ local Window = Rayfield:CreateWindow({
     LoadingSubtitle = "by pizzameboi",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = nil, -- Use default folder
+        FolderName = nil,
         FileName = "AutoFarmTool"
     }
 })
 
-local TabFarm = Window:CreateTab("Auto Farm", 4483362458) -- Example icon ID
+local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
 
--- Button to Toggle Auto Farm On/Off
+-- Toggle for Auto Farm
 TabFarm:CreateToggle({
     Name = "Auto Farm",
     CurrentValue = false,
-    Flag = "AutoFarmToggle", -- Saves toggle state
+    Flag = "AutoFarmToggle",
     Callback = function(value)
         autoHitEnabled = value
         if autoHitEnabled then
-            autoHit()
+            autoHit() -- Start auto-hitting when enabled
         end
     end
 })
 
-local TabBuy = Window:CreateTab("Auto Buy", 4483362458) -- Example icon ID
+local TabBuy = Window:CreateTab("Auto Buy", 4483362458)
 
--- Button to Toggle Auto Buy On/Off
+-- Toggle for Auto Buy
 TabBuy:CreateToggle({
     Name = "Skeleton Ducks",
     CurrentValue = false,
-    Flag = "AutoBuyToggle", -- Saves toggle state
+    Flag = "AutoBuyToggle",
     Callback = function(value)
         autoBuyEnabled = value
         if autoBuyEnabled then
-            autoBuy()
+            autoBuy() -- Start auto-buying when enabled
         end
     end
 })
