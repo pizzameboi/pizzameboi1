@@ -1,0 +1,133 @@
+-- Load Rayfield Library (Make sure it's correctly installed)
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+
+-- Variables for Auto Hit and Auto Buy
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+local breakables = workspace.GameObjects.Breakables
+local autoHitEnabled = false
+local autoBuyEnabled = false
+local lastTeleportedBreakable = nil -- Tracks the last breakable you teleported to
+
+-- Function to find the nearest breakable to the player
+local function getNearestBreakable()
+    local nearest = nil
+    local minDistance = math.huge
+    for _, breakable in ipairs(breakables:GetChildren()) do
+        if breakable:IsA("BasePart") and breakable.Parent then
+            local distance = (hrp.Position - breakable.Position).Magnitude
+            if distance < minDistance then
+                minDistance = distance
+                nearest = breakable
+            end
+        end
+    end
+    return nearest
+end
+
+-- Teleport function to the nearest breakable (only once per new breakable)
+local function teleportToBreakable(breakable)
+    if breakable and breakable ~= lastTeleportedBreakable and breakable:IsA("BasePart") then
+        character:SetPrimaryPartCFrame(breakable.CFrame)
+        lastTeleportedBreakable = breakable -- Set the current breakable as the last teleported one
+    end
+end
+
+-- Function to auto-hit the nearest breakable
+local function autoHit()
+    spawn(function()
+        while autoHitEnabled do
+            local nearestBreakable = getNearestBreakable()
+            if nearestBreakable then
+                -- Teleport only once per new breakable
+                teleportToBreakable(nearestBreakable)
+
+                -- Auto-hit the nearest breakable
+                local args = { [1] = nearestBreakable.Name }
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Packages")
+                    :WaitForChild("Knit")
+                    :WaitForChild("Services")
+                    :WaitForChild("BreakableService")
+                    :WaitForChild("RF")
+                    :WaitForChild("HitBreakable")
+                    :InvokeServer(unpack(args))
+            end
+            wait(0.05) -- Hit every 0.05 seconds
+        end
+    end)
+end
+
+-- Function to auto-buy from the merchant
+local function autoBuy()
+    spawn(function()
+        while autoBuyEnabled do
+            local args = {
+                [1] = "Zombie Merchant", -- Merchant name
+                [2] = 5 -- Quantity of item
+            }
+
+            -- Invoke the buy function on the server
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Packages")
+                :WaitForChild("Knit")
+                :WaitForChild("Services")
+                :WaitForChild("LimitedMerchantService")
+                :WaitForChild("RF")
+                :WaitForChild("BuyItem")
+                :InvokeServer(unpack(args))
+
+            wait(1) -- Adjust the delay between auto-buy attempts as needed
+        end
+    end)
+end
+
+-- Rayfield GUI Setup
+local Window = Rayfield:CreateWindow({
+    Name = "ruthie2188 discord script",
+    LoadingTitle = "Initializing...",
+    LoadingSubtitle = "by pizzameboi",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil, -- Use default folder
+        FileName = "AutoFarmTool"
+    }
+})
+
+local TabFarm = Window:CreateTab("Auto Farm", 4483362458) -- Example icon ID
+
+-- Button to Toggle Auto Farm On/Off
+TabFarm:CreateToggle({
+    Name = "Auto Farm",
+    CurrentValue = false,
+    Flag = "AutoFarmToggle", -- Saves toggle state
+    Callback = function(value)
+        autoHitEnabled = value
+        if autoHitEnabled then
+            autoHit()
+        end
+    end
+})
+
+local TabBuy = Window:CreateTab("Auto Buy", 4483362458) -- Example icon ID
+
+-- Button to Toggle Auto Buy On/Off
+TabBuy:CreateToggle({
+    Name = "Skeleton Ducks",
+    CurrentValue = false,
+    Flag = "AutoBuyToggle", -- Saves toggle state
+    Callback = function(value)
+        autoBuyEnabled = value
+        if autoBuyEnabled then
+            autoBuy()
+        end
+    end
+})
+
+Rayfield:Notify({
+    Title = "Auto Farm and Auto Buy Tool",
+    Content = "Loaded successfully!",
+    Duration = 5,
+    Image = 4483362458
+})
