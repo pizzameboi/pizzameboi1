@@ -89,7 +89,7 @@ end
 
 -- Rayfield GUI Setup
 local Window = Rayfield:CreateWindow({
-    Name = "ruthie2188 discord script",
+    Name = "AWS halloween script",
     LoadingTitle = "Initializing...",
     LoadingSubtitle = "by pizzameboi",
     ConfigurationSaving = {
