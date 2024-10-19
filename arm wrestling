@@ -44,7 +44,7 @@ local function teleportAndHit(breakable)
                 :WaitForChild("HitBreakable")
                 :InvokeServer(unpack(args))
 
-            wait(0.05) -- Hit every 0.05 seconds
+            wait(0.01) -- Faster hit interval (0.01 seconds)
         until not breakables:FindFirstChild(lastBreakableName)
     end
 end
@@ -57,7 +57,7 @@ local function autoHit()
             if nearestBreakable then
                 teleportAndHit(nearestBreakable)
             end
-            wait(0.1) -- Small delay between searches
+            wait(0.05) -- Faster search interval (0.05 seconds)
         end
     end)
 end
