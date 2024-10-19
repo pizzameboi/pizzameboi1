@@ -34,7 +34,6 @@ local function teleportAndHit(breakable)
 
         -- Auto-hit the breakable repeatedly until it disappears
         repeat
-            -- Hit the breakable
             local args = { [1] = breakable.Name }
             game:GetService("ReplicatedStorage")
                 :WaitForChild("Packages")
@@ -56,9 +55,9 @@ local function autoHit()
         while autoHitEnabled do
             local nearestBreakable = getNearestBreakable()
             if nearestBreakable then
-                teleportAndHit(nearestBreakable) -- Teleport and hit the breakable
+                teleportAndHit(nearestBreakable)
             end
-            wait(0.1) -- Small delay between each search for a new breakable
+            wait(0.1) -- Small delay between searches
         end
     end)
 end
@@ -67,12 +66,7 @@ end
 local function autoBuy()
     spawn(function()
         while autoBuyEnabled do
-            local args = {
-                [1] = "Zombie Merchant", -- Merchant name
-                [2] = 5 -- Quantity
-            }
-
-            -- Invoke the buy function
+            local args = { [1] = "Zombie Merchant", [2] = 5 }
             game:GetService("ReplicatedStorage")
                 :WaitForChild("Packages")
                 :WaitForChild("Knit")
@@ -89,7 +83,7 @@ end
 
 -- Rayfield GUI Setup
 local Window = Rayfield:CreateWindow({
-    Name = "AWS halloween script",
+    Name = "AWS Halloween Script",
     LoadingTitle = "Initializing...",
     LoadingSubtitle = "by pizzameboi",
     ConfigurationSaving = {
@@ -108,9 +102,7 @@ TabFarm:CreateToggle({
     Flag = "AutoFarmToggle",
     Callback = function(value)
         autoHitEnabled = value
-        if autoHitEnabled then
-            autoHit() -- Start auto-hitting when enabled
-        end
+        if autoHitEnabled then autoHit() end
     end
 })
 
@@ -123,15 +115,21 @@ TabBuy:CreateToggle({
     Flag = "AutoBuyToggle",
     Callback = function(value)
         autoBuyEnabled = value
-        if autoBuyEnabled then
-            autoBuy() -- Start auto-buying when enabled
-        end
+        if autoBuyEnabled then autoBuy() end
     end
 })
 
+local TabAntiAFK = Window:CreateTab("Anti AFK", 4483362458)
+
+-- Label with Anti AFK Command Info
+TabAntiAFK:CreateLabel("Use command 'antiafk' in Infinite Yield to prevent AFK kick.")
+
 Rayfield:Notify({
-    Title = "Auto Farm and Auto Buy Tool",
+    Title = "Auto Farm, Auto Buy, and Anti AFK Tool",
     Content = "Loaded successfully!",
     Duration = 5,
     Image = 4483362458
 })
+
+-- Load Infinite Yield
+loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
