@@ -1,23 +1,20 @@
--- Global toggle for showing notifications
-local showNotifications = false  -- Set to false to disable notifications
+-- Create a ScreenGui to cover the entire screen
+local whiteScreenGui = Instance.new("ScreenGui")
+whiteScreenGui.IgnoreGuiInset = true
+whiteScreenGui.DisplayOrder = 10 -- Ensure it appears above other GUIs
+whiteScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Example of a notification check
-if showNotifications then
-    OrionLib:MakeNotification({
-        Name = "Script Loaded",
-        Content = "AWS Halloween Script has been loaded successfully!",
-        Image = "rbxassetid://4483362458",
-        Time = 5
-    })
-end
+-- Create a Frame to display a white background
+local whiteFrame = Instance.new("Frame")
+whiteFrame.Size = UDim2.new(1, 0, 1, 0)
+whiteFrame.Position = UDim2.new(0, 0, 0, 0)
+whiteFrame.BackgroundColor3 = Color3.new(1, 1, 1) -- White color
+whiteFrame.BorderSizePixel = 0
+whiteFrame.Parent = whiteScreenGui
 
--- Replace other notification calls similarly:
--- Example:
-if showNotifications then
-    OrionLib:MakeNotification({
-        Name = "Inventory Loaded",
-        Content = "Unlocked pets have been loaded into the selector.",
-        Image = "rbxassetid://4483362458",
-        Time = 5
-    })
+-- Optional: Hide all existing GUIs by disabling them
+for _, gui in ipairs(game.Players.LocalPlayer.PlayerGui:GetChildren()) do
+    if gui ~= whiteScreenGui then
+        gui.Enabled = false
+    end
 end
