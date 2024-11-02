@@ -53,6 +53,6 @@ end
 spawn(function()
     while true do
         deleteAllPets()
-        wait(5)  -- Adjust this wait time as needed to control the frequency of deletions
+        wait(0.6)  -- Adjust this wait time as needed to control the frequency of deletions
     end
 end)
